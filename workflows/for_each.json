@@ -1,0 +1,169 @@
+{
+  "name": "dms ingestion delay",
+  "email_notifications": {
+    "no_alert_for_skipped_runs": false
+  },
+  "webhook_notifications": {},
+  "timeout_seconds": 0,
+  "max_concurrent_runs": 1,
+  "tasks": [
+    {
+      "task_key": "test",
+      "run_if": "ALL_SUCCESS",
+      "notebook_task": {
+        "notebook_path": "/Workspace/Users/kaio.pedroza/notebooks/tests/list tables from dms",
+        "source": "WORKSPACE"
+      },
+      "existing_cluster_id": "1226-130942-3vo9ldom",
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {}
+    },
+    {
+      "task_key": "process_metric_bil",
+      "depends_on": [
+        {
+          "task_key": "test"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "for_each_task": {
+        "inputs": "{{tasks.test.values.bil_all_tables}}",
+        "concurrency": 20,
+        "task": {
+          "task_key": "process_metric_iteration_bil",
+          "run_if": "ALL_SUCCESS",
+          "notebook_task": {
+            "notebook_path": "/Workspace/Users/kaio.pedroza/notebooks/tests/ingest metric",
+            "base_parameters": {
+              "table_name": "{{input.table_name}}",
+              "last_update_time": "{{input.last_update_time}}",
+              "table_state": "{{input.table_state}}",
+              "rows_inserted": "{{input.rows_inserted}}"
+            },
+            "source": "WORKSPACE"
+          },
+          "job_cluster_key": "Job_cluster",
+          "timeout_seconds": 0,
+          "email_notifications": {},
+          "webhook_notifications": {}
+        }
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {}
+    },
+    {
+      "task_key": "process_metric_cc",
+      "depends_on": [
+        {
+          "task_key": "test"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "for_each_task": {
+        "inputs": "{{tasks.test.values.cc_all_tables}}",
+        "concurrency": 20,
+        "task": {
+          "task_key": "process_metric_iteration_cc",
+          "run_if": "ALL_SUCCESS",
+          "notebook_task": {
+            "notebook_path": "/Workspace/Users/kaio.pedroza/notebooks/tests/ingest metric",
+            "base_parameters": {
+              "table_name": "{{input.table_name}}",
+              "last_update_time": "{{input.last_update_time}}",
+              "table_state": "{{input.table_state}}",
+              "rows_inserted": "{{input.rows_inserted}}"
+            },
+            "source": "WORKSPACE"
+          },
+          "job_cluster_key": "Job_cluster",
+          "timeout_seconds": 0,
+          "email_notifications": {},
+          "webhook_notifications": {}
+        }
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {}
+    },
+    {
+      "task_key": "process_metric_clon",
+      "depends_on": [
+        {
+          "task_key": "test"
+        }
+      ],
+      "run_if": "ALL_SUCCESS",
+      "for_each_task": {
+        "inputs": "{{tasks.test.values.clon_all_tables}}",
+        "concurrency": 20,
+        "task": {
+          "task_key": "process_metric_iteration_clon",
+          "run_if": "ALL_SUCCESS",
+          "notebook_task": {
+            "notebook_path": "/Workspace/Users/kaio.pedroza/notebooks/tests/ingest metric",
+            "base_parameters": {
+              "table_name": "{{input.table_name}}",
+              "last_update_time": "{{input.last_update_time}}",
+              "table_state": "{{input.table_state}}",
+              "rows_inserted": "{{input.rows_inserted}}"
+            },
+            "source": "WORKSPACE"
+          },
+          "job_cluster_key": "Job_cluster",
+          "timeout_seconds": 0,
+          "email_notifications": {},
+          "webhook_notifications": {}
+        }
+      },
+      "timeout_seconds": 0,
+      "email_notifications": {},
+      "webhook_notifications": {}
+    }
+  ],
+  "job_clusters": [
+    {
+      "job_cluster_key": "Job_cluster",
+      "new_cluster": {
+        "cluster_name": "",
+        "spark_version": "15.4.x-scala2.12",
+        "spark_conf": {
+          "spark.sql.parquet.compression.codec": "zstd"
+        },
+        "aws_attributes": {
+          "first_on_demand": 1,
+          "availability": "SPOT_WITH_FALLBACK",
+          "zone_id": "auto",
+          "spot_bid_price_percent": 100,
+          "ebs_volume_count": 0
+        },
+        "node_type_id": "mgd-fleet.xlarge",
+        "driver_node_type_id": "mgd-fleet.xlarge",
+        "enable_elastic_disk": false,
+        "policy_id": "000A0B5F326E288C",
+        "workload_type": {
+          "clients": {
+            "notebooks": false,
+            "jobs": true
+          }
+        },
+        "data_security_mode": "SINGLE_USER",
+        "runtime_engine": "STANDARD",
+        "autoscale": {
+          "min_workers": 1,
+          "max_workers": 10
+        }
+      }
+    }
+  ],
+  "tags": {
+    "test": ""
+  },
+  "queue": {
+    "enabled": true
+  },
+  "run_as": {
+    "user_name": "kaio.pedroza"
+  }
+}
